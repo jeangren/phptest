@@ -15,16 +15,17 @@
 <?php
 $bdd = new PDO('mysql:host=localhost;dbname=immobilier;charset=utf8;port=3306', 'root', 'root', [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]);
 
-$request = "INSERT INTO immobilier.logement (titre, adresse, ville, codepostal, surface, prix, description, img_src)
-            VALUES (:titre, :adresse, :ville, :codepostal, :surface, :prix, :description, :img_src)";
+$request = "INSERT INTO immobilier.logement (typelog, titre, adresse, ville, cp, surface, prix, description, img_src)
+            VALUES (:typelog, :titre, :adresse, :ville, :cp, :surface, :prix, :description, :img_src)";
 
 $response = $bdd->prepare($request);
 
 $response->execute([
+    'typelog'                 => $_POST['typelog'],
     'titre'                 => $_POST['titre'],
     'adresse'               => $_POST['adresse'],
     'ville'                 => $_POST['ville'],
-    'codepostal'            => $_POST['codepostal'],
+    'cp'                    => $_POST['codepostal'],
     'surface'               => $_POST['surface'],
     'prix'                  => $_POST['prix'],
     'description'           => $_POST['description'],
@@ -34,9 +35,38 @@ $response->execute([
 ?>
 
 <body>
-<p>ok</p>
+<div class="container">
+    <?php    
 
+    if (isset($_FILES['monfichier']) && ($_FILES['monfichier']['error'] == 0)) {
 
+        // Test si le fichier pas trop gros
+        if ($_FILES['monfichier']['size'] <= 500000) {
+            // Test si l'extension est autorisée
+            $infosfichier = pathinfo($_FILES['monfichier']['name']);
+            $extension_upload = $infosfichier['extension'];
+            
+            $extensions_autorisees = array('jpg', 'jpeg', 'gif', 'png');
+           if (in_array($extension_upload, $extensions_autorisees)) {
+                // On peut valider le fichier et le stocker définitivement
+                move_uploaded_file($_FILES['monfichier']['tmp_name'], 'uploads/' . basename($_FILES['monfichier']['name']));
+                echo 'Merci ' . $_POST['titre'] . " a bien été ajouté à notre base de donnée !";
+            }
+        }
+    } else {
+        echo 'Désolé ' . $_POST['pseudo'] . " vous n'avez pas respecté les critères d'envoi";
+    }
+    ?>
+</div>
+
+<footer class="text-muted">
+        <div class="container">
+            <p class="float-right">
+                <a href="index.php">Retour au formulaire</a>
+            </p>
+        </div>
+            
+    </footer>
 
 
 <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
